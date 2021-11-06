@@ -40,8 +40,9 @@ const App = () => {
     subscribeToLocation(async location => {
       const res = await API.getNearestStops(location);
       setListContent(
-        res.map(({name}) => ({
+        res.map(({name, id}) => ({
           label: name,
+          id,
         })),
       );
     });

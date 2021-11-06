@@ -4,6 +4,7 @@ import {CardListItem} from './cardListItem';
 import {StyleSheet} from 'react-native';
 
 export type CardItemContent = {
+  id: string;
   label: string;
 };
 
@@ -15,8 +16,8 @@ export const CardList: React.FC<CardListProps> = (props: CardListProps) => {
   const {content} = props;
   return (
     <Layout style={styles.container}>
-      {content.map(({label}) => (
-        <CardListItem iconName="car" label={label} />
+      {content.map(({label, id}) => (
+        <CardListItem key={id} iconName="car" label={label} />
       ))}
     </Layout>
   );

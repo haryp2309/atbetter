@@ -8,7 +8,7 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Dimensions,
   SafeAreaView,
@@ -21,15 +21,32 @@ import {
   Button,
   IconRegistry,
   Layout,
+  Text,
 } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
 import {Container} from './components/container';
 import {AppBar} from './components/appBar';
 import {EvaIconsPack} from '@ui-kitten/eva-icons';
-import {CardList} from './components/cardList';
+import {CardItemContent, CardList} from './components/cardList';
+import {subscribeToLocation} from './helpers/location.helpers';
+import {API} from './api';
 
 const App = () => {
   const darkMode = useColorScheme() === 'dark';
+
+  const [listContent, setListContent] = useState<CardItemContent[]>([]);
+
+  useEffect(() => {
+    subscribeToLocation(async location => {
+      const res = await API.getNearestStops(location);
+      setListContent(
+        res.map(({name}) => ({
+          label: name,
+        })),
+      );
+    });
+  }, []);
+
   return (
     <>
       <IconRegistry icons={EvaIconsPack} />
@@ -40,7 +57,7 @@ const App = () => {
             <AppBar />
             <ScrollView contentInsetAdjustmentBehavior="automatic">
               <Container>
-                <CardList />
+                <CardList content={listContent} />
               </Container>
             </ScrollView>
           </SafeAreaView>

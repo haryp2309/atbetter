@@ -3,17 +3,19 @@ import {Layout} from '@ui-kitten/components';
 import {CardListItem} from './cardListItem';
 import {StyleSheet} from 'react-native';
 
-export type CardListProps = {};
+export type CardItemContent = {
+  label: string;
+};
+
+export type CardListProps = {
+  content: CardItemContent[];
+};
 
 export const CardList: React.FC<CardListProps> = (props: CardListProps) => {
-  const {} = props;
+  const {content} = props;
   return (
     <Layout style={styles.container}>
-      {[
-        {label: 'Gløshaugen'},
-        {label: 'Høyskoleringen'},
-        {label: 'Samfundet'},
-      ].map(({label}) => (
+      {content.map(({label}) => (
         <CardListItem iconName="car" label={label} />
       ))}
     </Layout>

@@ -1,13 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
 import React, {useEffect, useState} from 'react';
 import {
   Dimensions,
@@ -24,14 +14,15 @@ import {
   Text,
 } from '@ui-kitten/components';
 import * as eva from '@eva-design/eva';
-import {Container} from './components/container';
-import {AppBar} from './components/appBar';
+import {Container} from '../components/container';
+import {AppBar} from '../components/appBar';
 import {EvaIconsPack} from '@ui-kitten/eva-icons';
-import {CardItemContent, CardList} from './components/cardList';
-import {subscribeToLocation} from './helpers/location.helpers';
-import {API} from './api';
+import {CardItemContent, CardList} from '../components/cardList';
+import {subscribeToLocation} from '../helpers/location.helpers';
+import {API} from '../api';
+import {Screens} from '../constants/screens';
 
-const App = () => {
+export const StopsList = () => {
   const darkMode = useColorScheme() === 'dark';
 
   const [listContent, setListContent] = useState<CardItemContent[]>([]);
@@ -67,5 +58,3 @@ const App = () => {
     </>
   );
 };
-
-export default App;

@@ -12,11 +12,15 @@
   "dependencies": {
     "@entur/sdk": "^4.3.0",
     "@eva-design/eva": "^2.1.1",
+    "@react-navigation/native": "^6.0.6",
+    "@react-navigation/native-stack": "^6.2.5",
     "@ui-kitten/components": "^5.1.1",
     "@ui-kitten/eva-icons": "^5.1.1",
     "react": "17.0.2",
     "react-native": "0.66.0",
     "react-native-location": "^2.5.0",
+    "react-native-safe-area-context": "^3.3.2",
+    "react-native-screens": "^3.9.0",
     "react-native-svg": "^12.1.1"
   },
   "devDependencies": {

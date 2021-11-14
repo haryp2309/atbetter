@@ -1,6 +1,8 @@
 import React, {useRef} from 'react';
 import {Card, Icon, Layout, Text} from '@ui-kitten/components';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import {Screens} from '../../constants/screens';
+import {NavigationStacks} from '../../constants/navigationStacks';
 
 export type CardListItemProps = {
   label: string;
@@ -23,7 +25,7 @@ export const CardListItem: React.FC<CardListItemProps> = (
 
   return (
     <Card style={styles.card} onPress={handleClick}>
-      <Layout style={styles.cardContent}>
+      <View style={styles.cardContent}>
         <Icon
           name={iconName}
           style={styles.icon}
@@ -33,7 +35,7 @@ export const CardListItem: React.FC<CardListItemProps> = (
           ref={ref}
         />
         <Text style={styles.text}>{label}</Text>
-      </Layout>
+      </View>
     </Card>
   );
 };
@@ -42,7 +44,7 @@ const styles = StyleSheet.create({
   card: {
     margin: 10,
     elevation: 4,
-    borderColor: 'white',
+    borderWidth: 0,
     flexGrow: 1,
   },
   cardContent: {

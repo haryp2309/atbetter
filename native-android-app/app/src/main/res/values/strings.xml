@@ -3,4 +3,5 @@
     <string name="lorem_ipsum">Lorem Ipsum</string>
     <string name="count">Count</string>
     <string name="action_settings">Ehmm... chumma</string>
+    <string name="nearest_bus_stops">Nearest bus stops</string>
 </resources>

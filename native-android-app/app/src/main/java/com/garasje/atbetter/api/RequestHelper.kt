@@ -8,7 +8,7 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
-class RequestHelper {
+object RequestHelper {
 
     fun get(
         context: Context,

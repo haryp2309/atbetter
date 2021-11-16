@@ -13,7 +13,7 @@ class EnturApi {
 
 
     fun getNearestStops(
-        context: Context, location: Location, successCallback: (busStops: Collection<BusStop>) -> Unit,
+        context: Context, location: Location, successCallback: (busStops: BusStop) -> Unit,
         errorCallback: Response.ErrorListener
     ) {
         val reqBody = JSONObject()
@@ -57,7 +57,6 @@ class EnturApi {
                 .getJSONArray("edges")
 
 
-            val busStops = ArrayList<BusStop>()
 
             for (i in 0 until stops.length()) {
                 val stopId = stops.getJSONObject(i)
@@ -68,9 +67,7 @@ class EnturApi {
                 EnturApi().getStop(context, stopId, {
                     val name = it.getJSONObject("name").getString("value")
                     val busStop = BusStop(name, stopId)
-                    busStops.add(busStop)
-
-                    successCallback(busStops)
+                    successCallback(busStop)
 
                 }, errorCallback)
             }

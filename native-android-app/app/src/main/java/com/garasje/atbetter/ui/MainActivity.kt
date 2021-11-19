@@ -14,14 +14,13 @@ import com.garasje.atbetter.helpers.LocationHelpers
 class MainActivity : AppCompatActivity() {
 
     private lateinit var busStopsRecyclerView: RecyclerView
-    private lateinit var toolbar: Toolbar
 
     private val busStopsRecyclerViewAdapter = BusStopsRecyclerViewAdapter {
         val intent = Intent(this, BusStopInfoActivity::class.java)
         GlobalState.addBusStop(it)
         intent.putExtra(BUS_STOP_EXTRAS, it.id)
         startActivity(intent)
-    }   
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +39,6 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         }
-        toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
     }
 
 

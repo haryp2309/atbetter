@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
 import com.garasje.atbetter.core.BusStop
@@ -17,6 +18,7 @@ class BusStopsRecyclerViewAdapter(val onClick: (busStop: BusStop) -> Unit): Recy
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textView: TextView = itemView.findViewById(R.id.textView1)
         val cardView: CardView = itemView.findViewById(R.id.card1)
+
     }
 
     fun addBusStop( busStop: BusStop) {
@@ -34,6 +36,7 @@ class BusStopsRecyclerViewAdapter(val onClick: (busStop: BusStop) -> Unit): Recy
         holder.cardView.setOnClickListener {
             onClick(busStops[position])
         }
+
     }
 
     override fun getItemCount(): Int {

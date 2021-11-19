@@ -28,7 +28,7 @@
             android:name=".ui.BusStopInfoActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.ATBetter.NoActionBar">
+            android:theme="@style/Theme.ATBetter.WithActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.MainActivity" />

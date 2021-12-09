@@ -8,7 +8,7 @@ import android.location.Location
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.LocationServices
 
-class LocationHelpers {
+object LocationHelpers {
     fun onLocationAccess(activity: Activity, onSuccess: (location: Location) -> Unit) {
         val fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity)
 

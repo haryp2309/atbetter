@@ -2,9 +2,12 @@ package com.garasje.atbetter.ui
 
 import android.content.Intent
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -13,11 +16,16 @@ import com.garasje.atbetter.api.EnturApi
 import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.helpers.GlobalPreferencesHelpers
 import com.garasje.atbetter.helpers.LocationHelpers
+import android.util.DisplayMetrics
+import android.view.WindowMetrics
+import androidx.annotation.RequiresApi
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var busStopsRecyclerView: RecyclerView
     private lateinit var favBusStopsRecyclerView: RecyclerView
+    private lateinit var rootLayout: ConstraintLayout
 
 
     private val busStopsRecyclerViewAdapter =
@@ -93,6 +101,8 @@ class MainActivity : AppCompatActivity() {
                 return false
             }
         }
+
+        rootLayout = findViewById(R.id.rootLayout)
     }
 
 
@@ -110,5 +120,6 @@ class MainActivity : AppCompatActivity() {
             })
         }
     }
+
 
 }

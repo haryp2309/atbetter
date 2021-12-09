@@ -1,18 +1,18 @@
-package com.garasje.atbetter.ui;
+package com.garasje.atbetter.ui
 
-import android.os.Build
 import android.os.Bundle
+import android.widget.Button
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
 import com.garasje.atbetter.api.EnturApi
+import com.garasje.atbetter.constants.GlobalPreferences
 import com.garasje.atbetter.core.BusStop
-import com.garasje.atbetter.core.UpcomingBus
-import java.time.LocalDateTime
+import com.garasje.atbetter.helpers.GlobalPreferencesHelpers
+import org.json.JSONArray
 
 const val BUS_STOP_EXTRAS = "com.garasje.atbetter.busstop"
 
@@ -20,6 +20,7 @@ class BusStopInfoActivity : AppCompatActivity() {
 
     private lateinit var toolbar: Toolbar
     private lateinit var bussesRecyclerView: RecyclerView
+    private lateinit var toggleFavorite: Button
 
     private lateinit var busStop: BusStop
     private val busInfoRecyclerViewAdapter = BusInfoRecyclerViewAdapter()
@@ -39,7 +40,7 @@ class BusStopInfoActivity : AppCompatActivity() {
                 busInfoRecyclerViewAdapter.updateUpcomingBuses(it)
             }
         }, {
-            Toast.makeText(this, "Could not fetch upcoming busses", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "Could not fetch upcoming busses", Toast.LENGTH_SHORT).show()
         })
     }
 
@@ -63,6 +64,12 @@ class BusStopInfoActivity : AppCompatActivity() {
             override fun canScrollVertically(): Boolean {
                 return false
             }
+        }
+
+        toggleFavorite = findViewById(R.id.toggleFavorite)
+
+        toggleFavorite.setOnClickListener {
+            GlobalPreferencesHelpers(this).toggleFavourite(busStop.id)
         }
     }
 

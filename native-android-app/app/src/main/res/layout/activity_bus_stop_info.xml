@@ -34,7 +34,14 @@
                 android:id="@+id/bussesRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                tools:itemCount="5"
                 tools:listitem="@layout/bus_info_card" />
+
+            <Button
+                android:id="@+id/toggleFavorite"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Toggle Favorite" />
         </LinearLayout>
     </ScrollView>
 

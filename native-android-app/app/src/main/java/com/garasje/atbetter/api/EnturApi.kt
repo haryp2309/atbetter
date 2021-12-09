@@ -13,14 +13,17 @@ import java.time.ZonedDateTime
 
 object EnturApi {
 
-    val API_BASE_URL = "https://api.entur.io/stop-places/v1/read"
-    val GRAPHQL_BASE_URL = "https://api.entur.io/journey-planner/v2/graphql"
+    private const val API_BASE_URL = "https://api.entur.io/stop-places/v1/read"
+    private const val GRAPHQL_BASE_URL = "https://api.entur.io/journey-planner/v2/graphql"
+
+    private const val JOURNEY_PROVIDER = "ENTUR JOURNEY API"
 
 
     fun getNearestStops(
         context: Context, location: Location, successCallback: (busStops: BusStop) -> Unit,
         errorCallback: Response.ErrorListener
     ) {
+
         val reqBody = JSONObject()
         reqBody.put(
             "query",
@@ -64,14 +67,20 @@ object EnturApi {
 
 
             for (i in 0 until stops.length()) {
-                val stopId = stops.getJSONObject(i)
+                val place = stops.getJSONObject(i)
                     .getJSONObject("node")
                     .getJSONObject("place")
-                    .getString("id")
+                val stopId = place.getString("id")
+
+                val stopLocation = Location(JOURNEY_PROVIDER)
+                stopLocation.latitude = place.getDouble("latitude")
+                stopLocation.longitude = place.getDouble("longitude")
+
+
 
                 getStop(context, stopId, {
                     val name = it.getJSONObject("name").getString("value")
-                    val busStop = BusStop(name, stopId)
+                    val busStop = BusStop(name, stopId, stopLocation)
                     successCallback(busStop)
 
                 }, errorCallback)
@@ -144,7 +153,7 @@ object EnturApi {
                     .getJSONObject("serviceJourney")
                     .getJSONObject("line")
                     .getString("publicCode")
-                val id = busName+bus
+                val id = busName + bus
                     .getJSONObject("serviceJourney")
                     .getJSONObject("line")
                     .getString("id")
@@ -152,10 +161,10 @@ object EnturApi {
                 val realtime = bus.getBoolean("realtime")
                 val arrivesAtString = bus.getString("aimedArrivalTime")
                 val cleanedArrivesAtString = "" +
-                    arrivesAtString.subSequence(0, 22) + ":" + arrivesAtString.subSequence(
-                        22,
-                        arrivesAtString.length
-                    )
+                        arrivesAtString.subSequence(0, 22) + ":" + arrivesAtString.subSequence(
+                    22,
+                    arrivesAtString.length
+                )
                 val arrivesAt = ZonedDateTime.parse(cleanedArrivesAtString).toLocalDateTime()
 
                 upcomingBusses += UpcomingBus(id, busName, busNumber, arrivesAt, realtime)

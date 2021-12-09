@@ -2,6 +2,8 @@
     <string name="app_name">ATBetter</string>
     <string name="lorem_ipsum">Lorem Ipsum</string>
     <string name="count">Count</string>
-    <string name="action_settings">Ehmm... chumma</string>
+    <string name="action_settings">Testtttt</string>
     <string name="nearest_bus_stops">Nearest bus stops</string>
+    <string name="x_meters_short">%1$dm</string>
+    <string name="bus_logo">bus_logo</string>
 </resources>

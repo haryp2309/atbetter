@@ -11,6 +11,7 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
 import com.garasje.atbetter.core.BusStop
+import java.util.function.Predicate
 import kotlin.math.roundToInt
 
 open class BusStopsRecyclerViewAdapter(
@@ -48,6 +49,19 @@ open class BusStopsRecyclerViewAdapter(
         sort()
     }
 
+    fun filterAwayStops(filterFunction: (id: String) -> Boolean) {
+        busStops
+            .filter { stop -> !filterFunction(stop.id) }
+            .map { busStops.indexOf(it) }
+            .sortedDescending() // So each loop won't affect the index of the next
+            .forEach { i ->
+                this.busStops.removeAt(i)
+                notifyItemRemoved(i)
+            }
+        sort()
+
+    }
+
     fun containsBusStopId(busStopId: String): Boolean {
         return this.busStops.map { busStop -> busStop.id }.contains(busStopId)
     }
@@ -66,7 +80,6 @@ open class BusStopsRecyclerViewAdapter(
         if (currentLocation.provider != NO_LOCATION) {
             val distance = busStops[position].location.distanceTo(currentLocation).roundToInt()
             holder.distanceText.text = getString(R.string.x_meters_short, distance)
-            //holder.distanceText.text = "${busStops[position].location.longitude} - ${currentLocation.longitude}"
         } else {
             holder.distanceText.text = ""
         }

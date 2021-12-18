@@ -4,7 +4,6 @@ import android.content.Context
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import org.json.JSONObject
 
@@ -51,6 +50,19 @@ object RequestHelper {
 
         queue.add(jsonObjectRequest)
 
+    }
+
+    fun queryGraphQL(
+        context: Context,
+        url: String, query: String, successCallback: Response.Listener<JSONObject>,
+        errorCallback: Response.ErrorListener
+    ) {
+
+        val reqBody = JSONObject()
+        reqBody.put("query", query.trimIndent())
+
+        post(context, url, reqBody, successCallback, errorCallback)
 
     }
+
 }

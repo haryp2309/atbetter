@@ -3,7 +3,8 @@ package com.garasje.atbetter.ui
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import android.widget.*
+import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,10 +15,15 @@ import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.helpers.GlobalPreferencesHelpers
 import com.garasje.atbetter.helpers.LocationHelpers
 
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var busStopsRecyclerView: RecyclerView
     private lateinit var favBusStopsRecyclerView: RecyclerView
+    private lateinit var rootLayout: DraggableConstraintLayout
+    private lateinit var nearestStopDrawer: LinearLayout
+
+    private val minimizedNearestStopHeight = 1000
 
 
     private val busStopsRecyclerViewAdapter =
@@ -54,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         this.injectFields()
+        this.initialUIUpdates()
     }
 
     private fun loadFavourites() {
@@ -79,6 +86,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun injectFields() {
         busStopsRecyclerView = findViewById(R.id.busStopsRecyclerView)
+        favBusStopsRecyclerView = findViewById(R.id.favBusStopsRecyclerView)
+        nearestStopDrawer = findViewById(R.id.nearestStopDrawer)
+        rootLayout = findViewById(R.id.rootLayout)
+    }
+
+    private fun initialUIUpdates() {
         busStopsRecyclerView.adapter = busStopsRecyclerViewAdapter
         busStopsRecyclerView.layoutManager = object : LinearLayoutManager(this) {
             override fun canScrollVertically(): Boolean {
@@ -86,13 +99,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        favBusStopsRecyclerView = findViewById(R.id.favBusStopsRecyclerView)
         favBusStopsRecyclerView.adapter = favBusStopsRecyclerViewAdapter
         favBusStopsRecyclerView.layoutManager = object : GridLayoutManager(this, 2) {
             override fun canScrollVertically(): Boolean {
                 return false
             }
         }
+
+        rootLayout.setDrawer(nearestStopDrawer)
+    }
+
+    private fun expandOrMinimizeNearestStops(forceMinimize: Boolean = false) {
+        val distance = if (forceMinimize || (nearestStopDrawer.top > (nearestStopDrawer.height / 2))) {
+            rootLayout.height - minimizedNearestStopHeight
+        } else {
+            0
+        } - nearestStopDrawer.top
+        nearestStopDrawer.animate()
+            .translationY(distance.toFloat())
+
     }
 
 
@@ -110,5 +135,6 @@ class MainActivity : AppCompatActivity() {
             })
         }
     }
+
 
 }

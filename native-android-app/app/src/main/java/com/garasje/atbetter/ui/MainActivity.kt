@@ -23,8 +23,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rootLayout: DraggableConstraintLayout
     private lateinit var nearestStopDrawer: LinearLayout
 
-    private val minimizedNearestStopHeight = 1000
-
 
     private val busStopsRecyclerViewAdapter =
         BusStopsRecyclerViewAdapter({ onBusStopClick(it) },
@@ -37,6 +35,7 @@ class MainActivity : AppCompatActivity() {
             { resId, formatArg1 ->
                 getString(resId, formatArg1)
             })
+
 
     private fun onBusStopClick(busStop: BusStop) {
         val intent = Intent(this, BusStopInfoActivity::class.java)
@@ -64,9 +63,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadFavourites() {
-        GlobalPreferencesHelpers(this).getFavouriteStopIds().forEach { busStopId ->
+        val favouriteIds = GlobalPreferencesHelpers(this).getFavouriteStopIds()
+        favBusStopsRecyclerViewAdapter.filterAwayStops { id ->
+            favouriteIds.contains(id)
+        }
+        favouriteIds.forEach { busStopId ->
             if (!favBusStopsRecyclerViewAdapter.containsBusStopId(busStopId)) {
-
+                // Favorite added
                 EnturApi.getStop(this, busStopId, {
                     val name = it.getJSONObject("name").getString("value")
                     val busStop =
@@ -75,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                 }, {
                     Toast.makeText(
                         this,
-                        "Could not fetch favourite ${busStopId}",
+                        "Could not fetch favourite $busStopId",
                         Toast.LENGTH_SHORT
                     ).show()
                 })
@@ -107,17 +110,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         rootLayout.setDrawer(nearestStopDrawer)
-    }
-
-    private fun expandOrMinimizeNearestStops(forceMinimize: Boolean = false) {
-        val distance = if (forceMinimize || (nearestStopDrawer.top > (nearestStopDrawer.height / 2))) {
-            rootLayout.height - minimizedNearestStopHeight
-        } else {
-            0
-        } - nearestStopDrawer.top
-        nearestStopDrawer.animate()
-            .translationY(distance.toFloat())
-
     }
 
 

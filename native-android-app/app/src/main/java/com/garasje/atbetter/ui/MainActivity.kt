@@ -1,7 +1,6 @@
 package com.garasje.atbetter.ui
 
 import android.content.Intent
-import android.location.Location
 import android.os.Bundle
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -67,23 +66,21 @@ class MainActivity : AppCompatActivity() {
         favBusStopsRecyclerViewAdapter.filterAwayStops { id ->
             favouriteIds.contains(id)
         }
-        favouriteIds.forEach { busStopId ->
-            if (!favBusStopsRecyclerViewAdapter.containsBusStopId(busStopId)) {
-                // Favorite added
-                EnturApi.getStop(this, busStopId, {
-                    val name = it.getJSONObject("name").getString("value")
-                    val busStop =
-                        BusStop(name, busStopId, Location(BusStopsRecyclerViewAdapter.NO_LOCATION))
+        EnturApi.getStops(this, favouriteIds, {
+            // Favorite added
+                busStops ->
+            busStops.forEach { busStop ->
+                if (!favBusStopsRecyclerViewAdapter.containsBusStopId(busStop.id)) {
                     favBusStopsRecyclerViewAdapter.addBusStop(busStop)
-                }, {
-                    Toast.makeText(
-                        this,
-                        "Could not fetch favourite $busStopId",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                })
+                }
             }
-        }
+        }, {
+            Toast.makeText(
+                this,
+                "Could not fetch favourite $favouriteIds",
+                Toast.LENGTH_SHORT
+            ).show()
+        })
     }
 
 

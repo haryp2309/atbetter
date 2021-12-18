@@ -2,21 +2,19 @@ package com.garasje.atbetter.api
 
 import android.content.Context
 import android.location.Location
-import android.widget.Toast
 import com.android.volley.Response
 import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.core.UpcomingBus
 import org.json.JSONObject
-import java.lang.Error
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
 
 object EnturApi {
 
-    private const val API_BASE_URL = "https://api.entur.io/stop-places/v1/read"
-    private const val GRAPHQL_BASE_URL = "https://api.entur.io/journey-planner/v2/graphql"
+    private const val JOURNEY_V2_GRAPHQL_API_URL = "https://api.entur.io/journey-planner/v2/graphql"
+    private const val JOURNEY_V3_GRAPHQL_API_URL = "https://api.entur.io/journey-planner/v3/graphql"
 
-    private const val JOURNEY_PROVIDER = "ENTUR JOURNEY API"
+    private const val JOURNEY_PROVIDER = "ENTUR_JOURNEY_API"
 
 
     fun getNearestStops(
@@ -24,9 +22,7 @@ object EnturApi {
         errorCallback: Response.ErrorListener
     ) {
 
-        val reqBody = JSONObject()
-        reqBody.put(
-            "query",
+        val query =
             """
                 {
                     nearest(
@@ -54,10 +50,9 @@ object EnturApi {
                         }
                     }
                 }
-            """.trimIndent()
-        )
+            """
 
-        RequestHelper.post(context, GRAPHQL_BASE_URL, reqBody, { response ->
+        RequestHelper.queryGraphQL(context, JOURNEY_V2_GRAPHQL_API_URL, query, { response ->
 
             val stops = response
                 .getJSONObject("data")
@@ -76,13 +71,11 @@ object EnturApi {
                 stopLocation.latitude = place.getDouble("latitude")
                 stopLocation.longitude = place.getDouble("longitude")
 
-
-
-                getStop(context, stopId, {
+                val url = "https://api.entur.io/stop-places/v1/read/stop-places/${stopId}?"
+                RequestHelper.get(context, url, {
                     val name = it.getJSONObject("name").getString("value")
                     val busStop = BusStop(name, stopId, stopLocation)
                     successCallback(busStop)
-
                 }, errorCallback)
             }
 
@@ -90,12 +83,51 @@ object EnturApi {
 
     }
 
-    fun getStop(
-        context: Context, id: String, successCallback: Response.Listener<JSONObject>,
+
+    fun getStops(
+        context: Context,
+        ids: Collection<String>,
+        successCallback: (busStops: Collection<BusStop>) -> Unit,
         errorCallback: Response.ErrorListener
     ) {
-        val url = "https://api.entur.io/stop-places/v1/read/stop-places/${id}?"
-        RequestHelper.get(context, url, successCallback, errorCallback)
+
+        val formattedIds = "\"" + ids.reduce { acc, s -> "$acc\", \"$s" } + "\""
+
+        val query = """
+            {
+              stopPlaces(ids: [${formattedIds}]) {
+                id
+                name
+                latitude
+                longitude
+              }
+            }
+        """
+
+        RequestHelper.queryGraphQL(context, JOURNEY_V3_GRAPHQL_API_URL, query, { response ->
+
+            val stopPlacesResponse = response
+                .getJSONObject("data")
+                .getJSONArray("stopPlaces")
+
+            val busStops = ArrayList<BusStop>()
+
+            for (i in 0 until stopPlacesResponse.length()) {
+                val place = stopPlacesResponse.getJSONObject(i)
+
+                val stopId = place.getString("id")
+                val name = place.getString("name")
+
+                val busStop = BusStop(name, stopId, Location(JOURNEY_PROVIDER))
+
+                busStop.location.latitude = place.getDouble("latitude")
+                busStop.location.longitude = place.getDouble("longitude")
+
+                busStops += busStop
+            }
+
+            successCallback(busStops)
+        }, errorCallback)
     }
 
     fun getUpcomingBusses(
@@ -134,7 +166,7 @@ object EnturApi {
         """.trimIndent()
         )
 
-        RequestHelper.post(context, GRAPHQL_BASE_URL, reqObject, {
+        RequestHelper.post(context, JOURNEY_V2_GRAPHQL_API_URL, reqObject, {
 
             val estimatedCalls = it
                 .getJSONObject("data")

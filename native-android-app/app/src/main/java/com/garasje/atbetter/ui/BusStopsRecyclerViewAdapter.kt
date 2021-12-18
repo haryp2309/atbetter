@@ -1,7 +1,6 @@
 package com.garasje.atbetter.ui
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.location.Location
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,6 @@ import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
 import com.garasje.atbetter.core.BusStop
-import java.util.function.Predicate
 import kotlin.math.roundToInt
 
 open class BusStopsRecyclerViewAdapter(
@@ -77,7 +75,7 @@ open class BusStopsRecyclerViewAdapter(
         holder.cardView.setOnClickListener {
             onClick(busStops[position])
         }
-        if (currentLocation.provider != NO_LOCATION) {
+        if (currentLocation.provider != NO_LOCATION && busStops[position].location.provider != NO_LOCATION) {
             val distance = busStops[position].location.distanceTo(currentLocation).roundToInt()
             holder.distanceText.text = getString(R.string.x_meters_short, distance)
         } else {

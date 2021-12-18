@@ -3,7 +3,6 @@ package com.garasje.atbetter.ui
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import android.view.View
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -107,17 +106,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        rootLayout.addDraggableChild(nearestStopDrawer)
-        rootLayout.setViewDragListener(object : DraggableConstraintLayout.ViewDragListener {
-            override fun onViewCaptured(view: View) {
-            }
-
-            override fun onViewReleased(view: View) {
-                expandOrMinimizeNearestStops()
-            }
-
-        })
-        expandOrMinimizeNearestStops(true)
+        rootLayout.setDrawer(nearestStopDrawer)
     }
 
     private fun expandOrMinimizeNearestStops(forceMinimize: Boolean = false) {

@@ -1,67 +1,53 @@
 package com.garasje.atbetter.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.ViewCompat
 import androidx.customview.widget.ViewDragHelper
 
-class DraggableConstraintLayout(context: Context, attributeSet: AttributeSet) : ConstraintLayout(context, attributeSet) {
-    interface ViewDragListener {
-        fun onViewCaptured(view: View)
-        fun onViewReleased(view: View)
-    }
+class DraggableConstraintLayout(context: Context, attributeSet: AttributeSet) :
+    ConstraintLayout(context, attributeSet) {
 
-    private var viewDragHelper: ViewDragHelper
-    private val draggableChildren: MutableCollection<View> = ArrayList()
-    private var viewDragListener: ViewDragListener? = null
+    var viewDragHelper: ViewDragHelper
+        private set
 
-    fun addDraggableChild(child: View) {
+    private var drawer: View? = null
+    private val callback: DraggableLayoutCallback = DraggableLayoutCallback(this)
+
+    fun setDrawer(child: View) {
         require(child.parent === this)
-        draggableChildren.add(child)
+        drawer = child
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         return viewDragHelper.shouldInterceptTouchEvent(ev) || super.onInterceptTouchEvent(ev)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         viewDragHelper.processTouchEvent(event)
-        return super.onTouchEvent(event)
+        return true
     }
 
-    private fun viewIsDraggableChild(view: View): Boolean {
-        return draggableChildren.isEmpty() || draggableChildren.contains(view)
+
+    override fun computeScroll() {
+        if (viewDragHelper.continueSettling(true)) {
+            ViewCompat.postInvalidateOnAnimation(this)
+        }
     }
 
-    fun setViewDragListener(viewDragListener: ViewDragListener) {
-        this.viewDragListener = viewDragListener
+    fun viewIsDraggableChild(view: View): Boolean {
+        return drawer == view
     }
+
 
     init {
-        viewDragHelper = ViewDragHelper.create(this, object : ViewDragHelper.Callback() {
-            override fun tryCaptureView(child: View, pointerId: Int): Boolean {
-                return child.visibility == VISIBLE && viewIsDraggableChild(child)
-            }
-
-            override fun onViewCaptured(capturedChild: View, activePointerId: Int) {
-                viewDragListener?.onViewCaptured(capturedChild)
-            }
-
-            override fun onViewReleased(releasedChild: View, xvel: Float, yvel: Float) {
-                viewDragListener?.onViewReleased(releasedChild)
-            }
-
-            override fun getViewVerticalDragRange(child: View): Int {
-                return child.height
-            }
-
-            override fun clampViewPositionVertical(child: View, top: Int, dy: Int): Int {
-                return top
-            }
-        })
-
+        viewDragHelper = ViewDragHelper.create(this, callback)
+        viewDragHelper.minVelocity = 1000F
     }
 
 }

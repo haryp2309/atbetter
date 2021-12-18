@@ -1,3 +1,5 @@
 <resources>
+
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="minimized_drawer_margin">-300dp</dimen>
 </resources>

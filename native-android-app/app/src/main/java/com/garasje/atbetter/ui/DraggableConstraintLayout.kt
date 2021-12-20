@@ -15,7 +15,7 @@ class DraggableConstraintLayout(context: Context, attributeSet: AttributeSet) :
     var viewDragHelper: ViewDragHelper
         private set
 
-    private var drawer: View? = null
+    private lateinit var drawer: View
     private val callback: DraggableLayoutCallback = DraggableLayoutCallback(this)
 
     fun setDrawer(child: View) {
@@ -43,7 +43,6 @@ class DraggableConstraintLayout(context: Context, attributeSet: AttributeSet) :
     fun viewIsDraggableChild(view: View): Boolean {
         return drawer == view
     }
-
 
     init {
         viewDragHelper = ViewDragHelper.create(this, callback)

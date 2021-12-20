@@ -1,8 +1,10 @@
 package com.garasje.atbetter.ui
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var favBusStopsRecyclerView: RecyclerView
     private lateinit var rootLayout: DraggableConstraintLayout
     private lateinit var nearestStopDrawer: LinearLayout
+    private lateinit var scrollView: ScrollView
 
 
     private val busStopsRecyclerViewAdapter =
@@ -54,6 +57,10 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+        }
+        window.navigationBarColor = getColor(R.color.design_default_color_primary)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -89,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         favBusStopsRecyclerView = findViewById(R.id.favBusStopsRecyclerView)
         nearestStopDrawer = findViewById(R.id.nearestStopDrawer)
         rootLayout = findViewById(R.id.rootLayout)
+        scrollView = findViewById(R.id.scrollView)
     }
 
     private fun initialUIUpdates() {

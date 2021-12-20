@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.setDecorFitsSystemWindows(false)
         }
+        window.navigationBarColor = getColor(R.color.design_default_color_primary)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

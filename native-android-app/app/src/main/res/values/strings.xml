@@ -6,5 +6,6 @@
     <string name="nearest_bus_stops">Nearest bus stops</string>
     <string name="x_meters_short">%1$dm</string>
     <string name="x_kilometers_short">%1$skm</string>
+    <string name="x_relative_time_in_minutes">%1$d min</string>
     <string name="bus_logo">bus_logo</string>
 </resources>

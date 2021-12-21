@@ -1,6 +1,7 @@
 package com.garasje.atbetter.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,8 +11,9 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
 import com.garasje.atbetter.core.UpcomingBus
+import com.garasje.atbetter.helpers.StringFormatter
 
-class BusInfoRecyclerViewAdapter :
+class BusInfoRecyclerViewAdapter(val context: Context) :
     RecyclerView.Adapter<BusInfoRecyclerViewAdapter.ViewHolder>() {
 
     private val upcomingBuses = ArrayList<UpcomingBus>()
@@ -62,10 +64,7 @@ class BusInfoRecyclerViewAdapter :
         val bus = upcomingBuses[position]
         holder.busName.text = bus.busName
         holder.busNumber.text = bus.busNumber
-        holder.busArrivalTime.text = "${bus.relativeArrivesAt()} min"
-
-
-
+        holder.busArrivalTime.text = StringFormatter.timeToRelativeTime(context, bus.arrivesAt)
     }
 
     override fun getItemCount(): Int {

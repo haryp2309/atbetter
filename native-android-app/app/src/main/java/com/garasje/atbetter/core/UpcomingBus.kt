@@ -9,10 +9,4 @@ data class UpcomingBus(
     override val busNumber: String,
     var arrivesAt: LocalDateTime,
     var realTime: Boolean
-) : Bus(id, busName, busNumber) {
-
-    fun relativeArrivesAt(): Int {
-        return ChronoUnit.MINUTES.between(LocalDateTime.now(), arrivesAt).toInt()
-
-    }
-}
+) : Bus(id, busName, busNumber)

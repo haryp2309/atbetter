@@ -13,8 +13,8 @@ import com.garasje.atbetter.R
 import com.garasje.atbetter.core.BusStop
 import kotlin.math.roundToInt
 
-class FavBusStopsRecyclerViewAdapter(onClick: (BusStop) -> Unit, getString: (Int, Int) -> String) : BusStopsRecyclerViewAdapter(
-    onClick, getString
+class FavBusStopsRecyclerViewAdapter(onClick: (BusStop) -> Unit, context: Context) : BusStopsRecyclerViewAdapter(
+    onClick, context
 ) {
     override var currentLocation: Location = Location(NO_LOCATION)
         @SuppressLint("NotifyDataSetChanged")

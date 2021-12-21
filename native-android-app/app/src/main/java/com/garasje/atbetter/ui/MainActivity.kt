@@ -27,16 +27,10 @@ class MainActivity : AppCompatActivity() {
 
 
     private val busStopsRecyclerViewAdapter =
-        BusStopsRecyclerViewAdapter({ onBusStopClick(it) },
-            { resId, formatArg1 ->
-                getString(resId, formatArg1)
-            })
+        BusStopsRecyclerViewAdapter({ onBusStopClick(it) }, this)
 
     private val favBusStopsRecyclerViewAdapter =
-        FavBusStopsRecyclerViewAdapter({ onBusStopClick(it) },
-            { resId, formatArg1 ->
-                getString(resId, formatArg1)
-            })
+        FavBusStopsRecyclerViewAdapter({ onBusStopClick(it) }, this)
 
 
     private fun onBusStopClick(busStop: BusStop) {

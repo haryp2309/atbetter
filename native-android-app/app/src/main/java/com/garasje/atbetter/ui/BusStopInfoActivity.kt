@@ -23,7 +23,7 @@ class BusStopInfoActivity : AppCompatActivity() {
     private lateinit var toggleFavorite: Button
 
     private lateinit var busStop: BusStop
-    private val busInfoRecyclerViewAdapter = BusInfoRecyclerViewAdapter()
+    private val busInfoRecyclerViewAdapter = BusInfoRecyclerViewAdapter(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

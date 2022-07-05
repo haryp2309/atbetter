@@ -1,15 +1,10 @@
 package com.garasje.atbetter.ui
 
 import com.garasje.atbetter.core.BusStop
+import com.garasje.atbetter.core.StopRegister
 
 object GlobalState {
-    private val busStops = HashMap<String, BusStop>()
 
-    fun getBusStop(id: String): BusStop? {
-        return busStops[id]
-    }
+    val busStops = StopRegister()
 
-    fun addBusStop(busStop: BusStop) {
-        busStops[busStop.id] = busStop
-    }
 }

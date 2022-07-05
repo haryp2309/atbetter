@@ -1,4 +1,4 @@
 package com.garasje.atbetter.core
 
-class BusStop {
+class StopRegister {
 }

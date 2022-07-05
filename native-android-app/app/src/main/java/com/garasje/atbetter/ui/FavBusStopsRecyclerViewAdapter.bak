@@ -1,0 +1,66 @@
+package com.garasje.atbetter.ui
+
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Location
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
+import com.garasje.atbetter.R
+import com.garasje.atbetter.core.BusStop
+import com.garasje.atbetter.helpers.StringFormatter
+import com.garasje.atbetter.ui.BusStopsRecyclerViewAdapter.Companion.NO_LOCATION
+import kotlin.math.roundToInt
+
+class FavBusStopsRecyclerViewAdapter(val onClick: (BusStop) -> Unit, val context: Context) :
+    RecyclerView.Adapter<FavBusStopsRecyclerViewAdapter.ViewHolder>() {
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val busStopName: TextView = itemView.findViewById(R.id.busStopName)
+        val cardView: CardView = itemView.findViewById(R.id.card1)
+        val distanceText: TextView = itemView.findViewById(R.id.distanceText)
+    }
+
+
+    var currentLocation: Location = Location(NO_LOCATION)
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view: View =
+            LayoutInflater.from(parent.context).inflate(R.layout.fav_bus_stop_card, parent, false)
+        return ViewHolder(view)
+    }
+
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun sort() {
+        GlobalState.favBusStops.sortByName()
+        notifyDataSetChanged()
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.busStopName.text = GlobalState.favBusStops[position].name
+        holder.cardView.setOnClickListener {
+            onClick(GlobalState.favBusStops[position])
+        }
+        if (currentLocation.provider != NO_LOCATION && GlobalState.favBusStops[position].location.provider != NO_LOCATION) {
+            val distance =
+                GlobalState.favBusStops[position].location.distanceTo(currentLocation).roundToInt()
+            holder.distanceText.text =
+                StringFormatter.distanceToFormattedDistance(context, distance)
+        } else {
+            holder.distanceText.text = ""
+        }
+    }
+
+    override fun getItemCount(): Int {
+        return GlobalState.favBusStops.size
+    }
+
+}

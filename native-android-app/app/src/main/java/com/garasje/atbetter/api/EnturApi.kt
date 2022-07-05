@@ -3,10 +3,8 @@ package com.garasje.atbetter.api
 import android.content.Context
 import android.location.Location
 import com.android.volley.Response
-import com.garasje.atbetter.core.BusStop
-import com.garasje.atbetter.core.UpcomingBus
-import org.json.JSONObject
-import java.time.LocalDateTime
+import com.garasje.atbetter.core.*
+import com.garasje.atbetter.ui.GlobalState
 import java.time.ZonedDateTime
 
 object EnturApi {
@@ -18,8 +16,9 @@ object EnturApi {
 
 
     fun getNearestStops(
-        context: Context, location: Location, successCallback: (busStops: BusStop) -> Unit,
-        errorCallback: Response.ErrorListener
+        context: Context, location: Location,
+        errorCallback: Response.ErrorListener,
+        successCallback: (busStops: BusStop) -> Unit
     ) {
 
         val query =
@@ -52,7 +51,12 @@ object EnturApi {
                 }
             """
 
-        RequestHelper.queryGraphQL(context, JOURNEY_V2_GRAPHQL_API_URL, query, { response ->
+        RequestHelper.queryGraphQL(
+            context,
+            JOURNEY_V2_GRAPHQL_API_URL,
+            query,
+            errorCallback
+        ) { response ->
 
             val stops = response
                 .getJSONObject("data")
@@ -79,7 +83,7 @@ object EnturApi {
                 }, errorCallback)
             }
 
-        }, errorCallback)
+        }
 
     }
 
@@ -87,8 +91,8 @@ object EnturApi {
     fun getStops(
         context: Context,
         ids: Collection<String>,
+        errorCallback: Response.ErrorListener,
         successCallback: (busStops: Collection<BusStop>) -> Unit,
-        errorCallback: Response.ErrorListener
     ) {
 
         val formattedIds = "\"" + ids.reduce { acc, s -> "$acc\", \"$s" } + "\""
@@ -104,7 +108,12 @@ object EnturApi {
             }
         """
 
-        RequestHelper.queryGraphQL(context, JOURNEY_V3_GRAPHQL_API_URL, query, { response ->
+        RequestHelper.queryGraphQL(
+            context,
+            JOURNEY_V3_GRAPHQL_API_URL,
+            query,
+            errorCallback
+        ) { response ->
 
             val stopPlacesResponse = response
                 .getJSONObject("data")
@@ -127,83 +136,264 @@ object EnturApi {
             }
 
             successCallback(busStops)
-        }, errorCallback)
+        }
     }
 
-    fun getUpcomingBusses(
+    /*fun getBusStopTimetable(
         context: Context,
-        busStopId: String,
-        successCallback: (upcomingBusses: Collection<UpcomingBus>) -> Unit,
-        errorCallback: Response.ErrorListener
+        busStop: BusStop,
+        errorCallback: Response.ErrorListener,
+        successCallback: (busLineAtStopStops: Collection<BusLineAtStop>) -> Unit,
     ) {
-        val reqObject = JSONObject()
-        reqObject.put(
-            "query", """
+        val query = """
             {
-              stopPlaces(
-                ids: ["$busStopId"]
+              stopPlace(
+                id: "${busStop.id}"
               ) {
-                id
-                name
                 estimatedCalls(
-                  startTime: "${LocalDateTime.now()}"
+                  numberOfDepartures: 100,
+                  numberOfDeparturesPerLineAndDestinationDisplay: 5
                 ) {
+                  serviceJourney{
+                    id
+                    line {
+                      publicCode
+                      id
+                    }
+                    
+                    estimatedCalls {
+                      expectedArrivalTime
+                      quay {
+                        stopPlace {
+                            id
+                        }
+                        name
+                        longitude
+                        latitude
+                      }
+                      realtime
+                    }
+                  }
                   destinationDisplay {
                     frontText
-                  }
-                  aimedArrivalTime
-                  realtime
-                  serviceJourney {
-                    line {
-                      id
-                      publicCode
-                    }
                   }
                 }
               }
             }
+        """
+        RequestHelper.queryGraphQL(
+            context,
+            JOURNEY_V3_GRAPHQL_API_URL,
+            query,
+            errorCallback
+        ) { response ->
 
-        """.trimIndent()
-        )
-
-        RequestHelper.post(context, JOURNEY_V2_GRAPHQL_API_URL, reqObject, {
-
-            val estimatedCalls = it
+            val estimatedCalls = response
                 .getJSONObject("data")
-                .getJSONArray("stopPlaces")
-                .getJSONObject(0)
+                .getJSONObject("stopPlace")
                 .getJSONArray("estimatedCalls")
 
-            val upcomingBusses = ArrayList<UpcomingBus>()
 
-            for (busIndex in 0 until estimatedCalls.length()) {
-                val bus = estimatedCalls.getJSONObject(busIndex)
-                val busName = bus
-                    .getJSONObject("destinationDisplay")
-                    .getString("frontText")
-                val busNumber = bus
-                    .getJSONObject("serviceJourney")
-                    .getJSONObject("line")
-                    .getString("publicCode")
-                val id = busName + bus
-                    .getJSONObject("serviceJourney")
-                    .getJSONObject("line")
-                    .getString("id")
+            val bussesAndArrivals = (0 until estimatedCalls.length())
+                .map { i -> estimatedCalls.getJSONObject(i) }
+                .map { estimatedCall ->
+                    val frontText = estimatedCall
+                        .getJSONObject("destinationDisplay")
+                        .getString("frontText")
+                    val publicCode = estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getJSONObject("line")
+                        .getString("publicCode")
+                    val id = frontText + estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getJSONObject("line")
+                        .getString("id")
+                    val journeyId = estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getString("id")
 
-                val realtime = bus.getBoolean("realtime")
-                val arrivesAtString = bus.getString("aimedArrivalTime")
-                val cleanedArrivesAtString = "" +
-                        arrivesAtString.subSequence(0, 22) + ":" + arrivesAtString.subSequence(
-                    22,
-                    arrivesAtString.length
-                )
-                val arrivesAt = ZonedDateTime.parse(cleanedArrivesAtString).toLocalDateTime()
+                    val busLine = BusLine(frontText, publicCode)
 
-                upcomingBusses += UpcomingBus(id, busName, busNumber, arrivesAt, realtime)
+                    val estimatedCallsOfAllStops = estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getJSONArray("estimatedCalls")
+                    val expectedArrivalOfAllStops = (0 until estimatedCallsOfAllStops.length())
+                        .map { estimatedCallsOfAllStops.getJSONObject(it) }
+                        .map { estimatedCallForAnotherStop ->
+                            val expectedArrivalTimeStringForAnotherStop =
+                                estimatedCallForAnotherStop
+                                    .getString("expectedArrivalTime")
+                            val expectedArrivalTimeForAnotherStop =
+                                ZonedDateTime.parse(expectedArrivalTimeStringForAnotherStop)
+                                    .toLocalDateTime()
 
-            }
+                            val isRealTimeForAnotherStop =
+                                estimatedCallForAnotherStop.getBoolean("realtime")
+
+                            val quay = estimatedCallForAnotherStop
+                                .getJSONObject("quay")
+                            val busStopName = quay
+                                .getString("name")
+                            val busStopId = quay
+                                .getJSONObject("stopPlace")
+                                .getString("id")
+                            val busStopLocation = Location(JOURNEY_PROVIDER)
+                            busStopLocation.latitude = quay
+                                .getDouble("latitude")
+                            busStopLocation.longitude = quay
+                                .getDouble("longitude")
+                            val stop = BusStop(busStopId, busStopName, busStopLocation)
+                            ArrivalTime(
+                                expectedArrivalTimeForAnotherStop,
+                                isRealTimeForAnotherStop,
+                                stop
+                            )
+                        }
+
+                    val bus = BusJourney(journeyId, busLine, expectedArrivalOfAllStops)
+
+
+
+                    Pair(bus, busLine)
+                }
+
+            val upcomingBusses = bussesAndArrivals
+                .map { it.second }
+                .distinct()
+                .map { bus ->
+                    val busses = bussesAndArrivals
+                        .filter { (_, tmpBusObj) -> tmpBusObj == bus }
+                        .map { it.first }
+
+                    BusLineAtStop(bus, busStop, busses)
+                }
 
             successCallback(upcomingBusses)
-        }, errorCallback)
+        }
+    }*/
+
+    fun fetchBusStopTimetable(
+        context: Context,
+        busStop: BusStop,
+        errorCallback: Response.ErrorListener,
+        successCallback: (Collection<BusJourney>) -> Unit,
+    ) {
+        val query = """
+            {
+              stopPlace(
+                id: "${busStop.id}"
+              ) {
+                estimatedCalls(
+                  numberOfDepartures: 100,
+                  numberOfDeparturesPerLineAndDestinationDisplay: 5
+                ) {
+                  serviceJourney{
+                    id
+                    line {
+                      publicCode
+                      id
+                    }
+                    
+                    estimatedCalls {
+                      expectedArrivalTime
+                      quay {
+                        stopPlace {
+                            id
+                            parent {
+                              id
+                            }
+                        }
+                        name
+                        longitude
+                        latitude
+                      }
+                      realtime
+                    }
+                  }
+                  destinationDisplay {
+                    frontText
+                  }
+                }
+              }
+            }
+        """
+
+        RequestHelper.queryGraphQL(
+            context,
+            JOURNEY_V3_GRAPHQL_API_URL,
+            query,
+            errorCallback
+        ) { response ->
+
+            val estimatedCalls = response
+                .getJSONObject("data")
+                .getJSONObject("stopPlace")
+                .getJSONArray("estimatedCalls")
+
+
+            val busJourneys = (0 until estimatedCalls.length())
+                .map { i -> estimatedCalls.getJSONObject(i) }
+                .map { estimatedCall ->
+                    val frontText = estimatedCall
+                        .getJSONObject("destinationDisplay")
+                        .getString("frontText")
+                    val publicCode = estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getJSONObject("line")
+                        .getString("publicCode")
+                    val id = frontText + estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getJSONObject("line")
+                        .getString("id")
+                    val journeyId = estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getString("id")
+
+                    val busLine = BusLine(frontText, publicCode)
+
+                    val estimatedCallsOfAllStops = estimatedCall
+                        .getJSONObject("serviceJourney")
+                        .getJSONArray("estimatedCalls")
+                    val expectedArrivalOfAllStops = (0 until estimatedCallsOfAllStops.length())
+                        .map { estimatedCallsOfAllStops.getJSONObject(it) }
+                        .map { estimatedCallForAnotherStop ->
+                            val expectedArrivalTimeStringForAnotherStop =
+                                estimatedCallForAnotherStop
+                                    .getString("expectedArrivalTime")
+                            val expectedArrivalTimeForAnotherStop =
+                                ZonedDateTime.parse(expectedArrivalTimeStringForAnotherStop)
+                                    .toLocalDateTime()
+
+                            val isRealTimeForAnotherStop =
+                                estimatedCallForAnotherStop.getBoolean("realtime")
+
+                            val quay = estimatedCallForAnotherStop
+                                .getJSONObject("quay")
+                            val busStopName = quay
+                                .getString("name")
+                            val stopPlace = quay.getJSONObject("stopPlace")
+                            val busStopId = if (stopPlace.isNull("parent"))
+                                stopPlace.getString("id")
+                            else stopPlace.getJSONObject("parent").getString("id")
+
+                            val busStopLocation = Location(JOURNEY_PROVIDER)
+                            busStopLocation.latitude = quay
+                                .getDouble("latitude")
+                            busStopLocation.longitude = quay
+                                .getDouble("longitude")
+                            val stop = BusStop(busStopName, busStopId, busStopLocation)
+                            ArrivalTime(
+                                expectedArrivalTimeForAnotherStop,
+                                isRealTimeForAnotherStop,
+                                stop
+                            )
+                        }
+
+                    BusJourney(journeyId, busLine, expectedArrivalOfAllStops)
+
+                }
+
+            successCallback(busJourneys)
+        }
     }
 }

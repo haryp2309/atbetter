@@ -10,16 +10,14 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
-import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.helpers.StringFormatter
-import kotlin.math.roundToInt
 
 open class BusStopsRecyclerViewAdapter(
     val onClick: (busStop: BusStop) -> Unit,
     val context: Context
 ) : RecyclerView.Adapter<BusStopsRecyclerViewAdapter.ViewHolder>() {
 
-    val busStops = ArrayList<BusStop>()
+    val busStops: ArrayList<BusStop> = ArrayList()
 
     open var currentLocation: Location = Location(NO_LOCATION)
         set(value) {
@@ -32,7 +30,6 @@ open class BusStopsRecyclerViewAdapter(
         val busStopName: TextView = itemView.findViewById(R.id.busStopName)
         val cardView: CardView = itemView.findViewById(R.id.card1)
         val distanceText: TextView = itemView.findViewById(R.id.distanceText)
-
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -44,8 +41,10 @@ open class BusStopsRecyclerViewAdapter(
     }
 
     fun addBusStop(busStop: BusStop) {
-        this.busStops.add(busStop)
-        notifyItemInserted(busStops.indexOf(busStop))
+        if (!busStops.contains(busStop)) {
+            this.busStops.add(busStop)
+            notifyItemInserted(busStops.indexOf(busStop))
+        }
         sort()
     }
 
@@ -58,8 +57,7 @@ open class BusStopsRecyclerViewAdapter(
                 this.busStops.removeAt(i)
                 notifyItemRemoved(i)
             }
-        sort()
-
+        // sort() should not be needed here because filtering won't change the order anyways
     }
 
     fun containsBusStopId(busStopId: String): Boolean {
@@ -79,7 +77,8 @@ open class BusStopsRecyclerViewAdapter(
         }
         if (currentLocation.provider != NO_LOCATION && busStops[position].location.provider != NO_LOCATION) {
             val distance = busStops[position].location.distanceTo(currentLocation).roundToInt()
-            holder.distanceText.text = StringFormatter.distanceToFormattedDistance(context, distance)
+            holder.distanceText.text =
+                StringFormatter.distanceToFormattedDistance(context, distance)
         } else {
             holder.distanceText.text = ""
         }

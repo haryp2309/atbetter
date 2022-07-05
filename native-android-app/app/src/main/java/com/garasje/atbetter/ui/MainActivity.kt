@@ -5,14 +5,11 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.LinearLayout
 import android.widget.ScrollView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
-import com.garasje.atbetter.api.EnturApi
-import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.helpers.GlobalPreferencesHelpers
 import com.garasje.atbetter.helpers.LocationHelpers
 
@@ -35,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun onBusStopClick(busStop: BusStop) {
         val intent = Intent(this, BusStopInfoActivity::class.java)
-        GlobalState.addBusStop(busStop)
+        GlobalState.busStops.addBusStop(busStop)
         intent.putExtra(BUS_STOP_EXTRAS, busStop.id)
         startActivity(intent)
 
@@ -67,21 +64,11 @@ class MainActivity : AppCompatActivity() {
         favBusStopsRecyclerViewAdapter.filterAwayStops { id ->
             favouriteIds.contains(id)
         }
-        EnturApi.getStops(this, favouriteIds, {
-            // Favorite added
-                busStops ->
+        GlobalState.fetchStops(this, favouriteIds) { busStops ->
             busStops.forEach { busStop ->
-                if (!favBusStopsRecyclerViewAdapter.containsBusStopId(busStop.id)) {
-                    favBusStopsRecyclerViewAdapter.addBusStop(busStop)
-                }
+                favBusStopsRecyclerViewAdapter.addBusStop(busStop)
             }
-        }, {
-            Toast.makeText(
-                this,
-                "Could not fetch favourite $favouriteIds",
-                Toast.LENGTH_SHORT
-            ).show()
-        })
+        }
     }
 
 
@@ -117,13 +104,15 @@ class MainActivity : AppCompatActivity() {
             favBusStopsRecyclerViewAdapter.currentLocation = location
             busStopsRecyclerViewAdapter.currentLocation = location
 
-            EnturApi.getNearestStops(this, location, { busStop ->
-                if (!busStopsRecyclerViewAdapter.containsBusStopId(busStop.id)) {
-                    busStopsRecyclerViewAdapter.addBusStop(busStop)
-                }
+            GlobalState.fetchNearestStops(this, location) {
+                busStopsRecyclerViewAdapter.addBusStop(it)
+            }
+
+            /*EnturApi.getNearestStops(this, location, { busStop ->
+
             }, {
                 Toast.makeText(this, "Could not find nearest stops", Toast.LENGTH_SHORT).show()
-            })
+            })*/
         }
     }
 

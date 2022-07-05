@@ -1,13 +1,8 @@
 package com.garasje.atbetter.helpers
 
 import android.content.Context
-import android.location.Location
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import com.garasje.atbetter.api.EnturApi
 import com.garasje.atbetter.constants.GlobalPreferences
-import com.garasje.atbetter.core.BusStop
-import com.garasje.atbetter.ui.BusStopsRecyclerViewAdapter
 import org.json.JSONArray
 
 class GlobalPreferencesHelpers(val context: Context) {

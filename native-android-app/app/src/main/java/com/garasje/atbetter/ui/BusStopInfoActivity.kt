@@ -2,17 +2,14 @@ package com.garasje.atbetter.ui
 
 import android.os.Bundle
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.garasje.atbetter.R
-import com.garasje.atbetter.api.EnturApi
-import com.garasje.atbetter.constants.GlobalPreferences
+import com.garasje.atbetter.core.BusLineAtStop
 import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.helpers.GlobalPreferencesHelpers
-import org.json.JSONArray
 
 const val BUS_STOP_EXTRAS = "com.garasje.atbetter.busstop"
 
@@ -34,19 +31,26 @@ class BusStopInfoActivity : AppCompatActivity() {
 
         toolbar.title = busStop.name
 
+        fetchBusStopTimetable()
+    }
 
-        EnturApi.getUpcomingBusses(this, busStop.id, {
-            it.forEach {
-                busInfoRecyclerViewAdapter.updateUpcomingBuses(it)
-            }
-        }, {
-            Toast.makeText(this, "Could not fetch upcoming busses", Toast.LENGTH_SHORT).show()
-        })
+    private fun fetchBusStopTimetable() {
+        GlobalState.fetchBusStopTimetable(this, busStop)
+        GlobalState.busJourneys.subscribeToBusStop(busStop) { busses ->
+            val busLineAtStops = busses
+                .map { bus -> bus.busLine }
+                .distinct()
+                .map { busLine ->
+                    BusLineAtStop(busLine, busStop, busses.filter { it.busLine == busLine })
+                }
+            busInfoRecyclerViewAdapter.updateUpcomingBuses(busLineAtStops)
+        }
+
     }
 
     private fun retrieveState() {
         val busStopId = intent.extras?.getString(BUS_STOP_EXTRAS)
-        val busStop = busStopId?.let { GlobalState.getBusStop(it) }
+        val busStop = busStopId?.let { GlobalState.busStops.getBusStop(it) }
         if (busStop == null) {
             finish()
         } else {

@@ -96,19 +96,19 @@ class MainActivity : AppCompatActivity() {
     private fun initialUIUpdates() {
         busStopsRecyclerView.adapter = busStopsRecyclerViewAdapter
         busStopsRecyclerView.layoutManager = object : LinearLayoutManager(this) {
-            override fun canScrollVertically(): Boolean {
-                return false
-            }
+            override fun canScrollVertically() = false
         }
 
         favBusStopsRecyclerView.adapter = favBusStopsRecyclerViewAdapter
         favBusStopsRecyclerView.layoutManager = object : GridLayoutManager(this, 2) {
-            override fun canScrollVertically(): Boolean {
-                return false
-            }
+            override fun canScrollVertically() = false
         }
 
         rootLayout.setDrawer(nearestStopDrawer)
+        //nearestStopDrawer.minimumHeight = 1000
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            nearestStopDrawer.minimumHeight = windowManager.currentWindowMetrics.bounds.height()
+        }
     }
 
 

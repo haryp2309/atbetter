@@ -36,7 +36,7 @@ object RequestHelper {
         context: Context,
         url: String,
         body: JSONObject,
-        successCallback: Response.Listener<JSONObject>,
+        successCallback: Response.Listener<JSONObject?>,
         errorCallback: Response.ErrorListener
     ) {
 
@@ -54,14 +54,14 @@ object RequestHelper {
 
     fun queryGraphQL(
         context: Context,
-        url: String, query: String, successCallback: Response.Listener<JSONObject>,
+        url: String, query: String, successCallback: (GraphQLResponse) -> Unit,
         errorCallback: Response.ErrorListener
     ) {
 
         val reqBody = JSONObject()
         reqBody.put("query", query.trimIndent())
 
-        post(context, url, reqBody, successCallback, errorCallback)
+        post(context, url, reqBody, { successCallback(GraphQLResponse(it)) }, errorCallback)
 
     }
 

@@ -5,6 +5,7 @@ import android.location.Location
 import com.android.volley.Response
 import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.core.UpcomingBus
+import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
@@ -54,12 +55,10 @@ object EnturApi {
 
         RequestHelper.queryGraphQL(context, JOURNEY_V2_GRAPHQL_API_URL, query, { response ->
 
-            val stops = response
-                .getJSONObject("data")
-                .getJSONObject("nearest")
-                .getJSONArray("edges")
-
-
+            val stops = response.data
+                ?.getJSONObject("nearest")
+                ?.getJSONArray("edges")
+                ?: JSONArray()
 
             for (i in 0 until stops.length()) {
                 val place = stops.getJSONObject(i)
@@ -91,7 +90,7 @@ object EnturApi {
         errorCallback: Response.ErrorListener
     ) {
 
-        val formattedIds = "\"" + ids.reduce { acc, s -> "$acc\", \"$s" } + "\""
+        val formattedIds = "\"" + (ids.reduceOrNull { acc, s -> "$acc\", \"$s" } ?: "") + "\""
 
         val query = """
             {
@@ -106,9 +105,9 @@ object EnturApi {
 
         RequestHelper.queryGraphQL(context, JOURNEY_V3_GRAPHQL_API_URL, query, { response ->
 
-            val stopPlacesResponse = response
-                .getJSONObject("data")
-                .getJSONArray("stopPlaces")
+            val stopPlacesResponse = response.data
+                ?.getJSONArray("stopPlaces")
+                ?: JSONArray()
 
             val busStops = ArrayList<BusStop>()
 
@@ -169,10 +168,11 @@ object EnturApi {
         RequestHelper.post(context, JOURNEY_V2_GRAPHQL_API_URL, reqObject, {
 
             val estimatedCalls = it
-                .getJSONObject("data")
-                .getJSONArray("stopPlaces")
-                .getJSONObject(0)
-                .getJSONArray("estimatedCalls")
+                ?.getJSONObject("data")
+                ?.getJSONArray("stopPlaces")
+                ?.getJSONObject(0)
+                ?.getJSONArray("estimatedCalls")
+                ?: JSONArray()
 
             val upcomingBusses = ArrayList<UpcomingBus>()
 

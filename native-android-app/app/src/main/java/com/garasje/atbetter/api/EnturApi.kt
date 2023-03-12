@@ -3,6 +3,8 @@ package com.garasje.atbetter.api
 import android.content.Context
 import android.location.Location
 import com.android.volley.Response
+import com.apollographql.apollo3.ApolloClient
+import com.garasje.atbetter.NearestStopsQuery
 import com.garasje.atbetter.core.BusStop
 import com.garasje.atbetter.core.UpcomingBus
 import org.json.JSONArray
@@ -18,10 +20,26 @@ object EnturApi {
     private const val JOURNEY_PROVIDER = "ENTUR_JOURNEY_API"
 
 
-    fun getNearestStops(
+    suspend fun getNearestStops(
         context: Context, location: Location, successCallback: (busStops: BusStop) -> Unit,
         errorCallback: Response.ErrorListener
     ) {
+
+        // TODO
+
+        val apolloClient = ApolloClient.Builder()
+            .serverUrl(JOURNEY_V3_GRAPHQL_API_URL)
+            .build()
+
+        val response = apolloClient
+            .query(NearestStopsQuery(location.latitude, location.longitude))
+            .execute()
+
+        val stops = response.data?.nearest?.edges?.toList() ?: ArrayList()
+
+        // TODO
+
+
 
         val query =
             """

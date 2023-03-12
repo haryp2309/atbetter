@@ -1,0 +1,26 @@
+query NearestStops ($lat: Float!, $lon: Float!){
+    nearest(
+        latitude: $lat,
+        longitude: $lon,
+        maximumDistance: 2000,
+        maximumResults: 20,
+        filterByPlaceTypes: [
+            stopPlace,
+        ],
+        filterByModes: bus,
+        filterByInUse: false,
+        multiModalMode: parent
+    ) {
+        edges {
+            node {
+                distance
+                place {
+                    __typename
+                    id
+                    latitude
+                    longitude
+                }
+            }
+        }
+    }
+}
